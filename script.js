@@ -1,61 +1,68 @@
-let users = []; // Список пользователей (для симуляции базы данных)
-let currentUser = null;
+let currentPlayer = 'X';
+let gameBoard = ['', '', '', '', '', '', '', '', ''];
+let isGameActive = true;
 
-function showRegisterForm() {
-    document.getElementById('register-form').style.display = 'block';
-    document.getElementById('login-form').style.display = 'none';
-}
+const dino = document.getElementById('dino');
+const gameContainer = document.getElementById('game-container');
+const authContainer = document.getElementById('auth-container');
+const logoutButton = document.getElementById('logout');
 
-function showLoginForm() {
-    document.getElementById('register-form').style.display = 'none';
-    document.getElementById('login-form').style.display = 'block';
-}
+const jumpDino = () => {
+    dino.classList.add('jumping');
+    setTimeout(() => {
+        dino.classList.remove('jumping');
+    }, 500); // Динозаврик будет прыгать 0.5 секунды
+};
 
-function register() {
-    const username = document.getElementById('register-username').value;
-    const password = document.getElementById('register-password').value;
+const startGame = () => {
+    gameContainer.style.display = 'block';
+    authContainer.style.display = 'none';
+    setInterval(jumpDino, 2000); // Динозаврик будет прыгать каждые 2 секунды
+};
 
-    if (username && password) {
-        // Проверка на существующего пользователя
-        if (users.find(user => user.username === username)) {
-            alert('Username already exists!');
-            return;
-        }
+const logout = () => {
+    localStorage.removeItem('username');
+    localStorage.removeItem('password');
+    gameContainer.style.display = 'none';
+    authContainer.style.display = 'flex';
+};
 
-        users.push({ username, password });
-        alert('Registration successful!');
-        showLoginForm();
-    } else {
-        alert('Please fill in both fields.');
+const registerForm = document.getElementById('register-form');
+const loginForm = document.getElementById('login-form');
+
+registerForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    if (localStorage.getItem('username') === username) {
+        alert('Пользователь с таким именем уже существует');
+        return;
     }
-}
 
-function login() {
+    localStorage.setItem('username', username);
+    localStorage.setItem('password', password);
+    alert('Регистрация успешна!');
+});
+
+loginForm.addEventListener('submit', (event) => {
+    event.preventDefault();
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
 
-    const user = users.find(user => user.username === username && user.password === password);
-
-    if (user) {
-        currentUser = user;
-        alert('Login successful!');
-        showGame();
+    if (localStorage.getItem('username') === username && localStorage.getItem('password') === password) {
+        alert('Авторизация успешна!');
+        startGame();
     } else {
-        alert('Invalid username or password.');
+        alert('Неверные данные');
     }
-}
+});
 
-function showGame() {
-    document.getElementById('auth-container').style.display = 'none';
-    document.getElementById('game-container').style.display = 'block';
-}
+logoutButton.addEventListener('click', logout);
 
-function startGame() {
-    alert('The game has started! (This is just a placeholder.)');
-}
-
-function logout() {
-    currentUser = null;
-    document.getElementById('game-container').style.display = 'none';
-    document.getElementById('auth-container').style.display = 'block';
+// Проверка, авторизован ли пользователь
+if (localStorage.getItem('username') && localStorage.getItem('password')) {
+    gameContainer.style.display = 'block';
+    authContainer.style.display = 'none';
+    setInterval(jumpDino, 2000); // Динозаврик начнёт прыгать сразу после авторизации
 }
